@@ -1,0 +1,50 @@
+---
+name: MegaLinter
+
+on:
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  megalinter:
+    name: MegaLinter
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: MegaLinter
+        uses: oxsecurity/megalinter@v8
+        env:
+          VALIDATE_ALL_CODEBASE: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PYTHON_BLACK_CONFIG_FILE: pyproject.toml
+          PYTHON_PYLINT_CONFIG_FILE: .pylintrc
+          PYTHON_FLAKE8_CONFIG_FILE: .flake8
+          # Enable only the linters we need
+          ENABLE_LINTERS: |
+            PYTHON_BLACK
+            PYTHON_PYLINT
+            PYTHON_FLAKE8
+            MARKDOWN_MARKDOWNLINT
+            YAML_YAMLLINT
+          # Disable specific error types if needed
+          DISABLE_ERRORS: false
+          # Output formats
+          REPORT_OUTPUT_FOLDER: megalinter-reports
+          TEXT_REPORTER: true
+          MARKDOWN_REPORTER: true
+          GITHUB_STATUS_REPORTER: true
+          GITHUB_COMMENT_REPORTER: true
+
+      - name: Archive MegaLinter reports
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: megalinter-reports
+          path: megalinter-reports/ 
