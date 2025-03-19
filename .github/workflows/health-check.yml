@@ -1,13 +1,11 @@
 name: Health Check
 
 on:
-  schedule:
-    - cron: '*/15 * * * *'  # Runs every 15 minutes
-  workflow_dispatch:  # Allows manual trigger
   workflow_run:
     workflows: ["Deploy to Heroku"]
     types:
       - completed
+  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   health_check:
