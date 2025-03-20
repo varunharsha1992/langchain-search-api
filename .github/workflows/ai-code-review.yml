@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: AI Code Review
+      - name: AI Code Review Action
         uses: aidar-freeed/ai-codereviewer@v2.7.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
