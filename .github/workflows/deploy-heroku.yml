@@ -36,7 +36,9 @@ jobs:
           pip install -r requirements.txt
 
       - name: Deploy to Heroku Staging
-        if: github.event.inputs.environment == 'staging' || github.ref != 'refs/heads/main'
+        if: |
+          github.event.inputs.environment == 'staging' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main')
         uses: akhileshns/heroku-deploy@v3.13.15
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
@@ -47,7 +49,9 @@ jobs:
           rollbackonhealthcheckfailed: true
 
       - name: Deploy to Heroku Production
-        if: github.event.inputs.environment == 'production' && github.ref == 'refs/heads/main'
+        if: |
+          github.event.inputs.environment == 'production' ||
+          (github.event_name == 'push' && github.ref == 'refs/heads/main')
         uses: akhileshns/heroku-deploy@v3.13.15
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
