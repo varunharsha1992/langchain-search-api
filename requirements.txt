@@ -3,6 +3,7 @@ uvicorn
 langchain
 langchain-community
 langchain-core
+langchain-openai
 python-dotenv
 duckduckgo-search
 pydantic 
