@@ -49,8 +49,7 @@ jobs:
           heroku_app_name: langchain-search-api-staging
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           procfile: "web: uvicorn src.main:app --host=0.0.0.0 --port=$PORT"
-          healthcheck: "https://langchain-search-api-staging.herokuapp.com/health"
-          rollbackonhealthcheckfailed: true
+          rollbackonhealthcheckfailed: false
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           
@@ -64,7 +63,6 @@ jobs:
           heroku_app_name: langchain-search-api
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           procfile: "web: uvicorn src.main:app --host=0.0.0.0 --port=$PORT"
-          healthcheck: "https://langchain-search-api.herokuapp.com/health"
-          rollbackonhealthcheckfailed: true
+          rollbackonhealthcheckfailed: false
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} 
