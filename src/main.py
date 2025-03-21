@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain.agents import AgentType, initialize_agent
-from langchain_community.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from typing import Optional
 import os
 from dotenv import load_dotenv
@@ -22,7 +22,6 @@ search = DuckDuckGoSearchRun()
 llm = ChatOpenAI(
     temperature=0,
     model="gpt-3.5-turbo",
-    api_key=os.getenv("OPENAI_API_KEY")
 )
 
 # Initialize agent
@@ -61,6 +60,10 @@ async def search_and_summarize(request: SearchRequest):
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Search and Summarize API. Use /search endpoint to search and summarize content."}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 if __name__ == "__main__":
     import uvicorn
