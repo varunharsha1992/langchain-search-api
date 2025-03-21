@@ -22,7 +22,6 @@ search = DuckDuckGoSearchRun()
 llm = ChatOpenAI(
     temperature=0,
     model="gpt-3.5-turbo",
-    api_key=os.getenv("OPENAI_API_KEY")
 )
 
 # Initialize agent
