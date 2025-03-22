@@ -28,9 +28,12 @@ jobs:
       - name: Install Heroku CLI
         run: |
           curl https://cli-assets.heroku.com/install.sh | sh
+        continue-on-error: false
 
-      - name: Authenticate with Heroku
+      - name: Create Heroku Authentication file
         run: |
+          # Create Heroku authentication file
+          echo "Creating Heroku authentication file..."
           cat > ~/.netrc << EOF
           machine api.heroku.com
             login ${{ secrets.HEROKU_EMAIL }}
@@ -40,43 +43,105 @@ jobs:
             password ${{ secrets.HEROKU_API_KEY }}
           EOF
           chmod 600 ~/.netrc
+          echo "Authentication file created successfully."
+        continue-on-error: false
+
+      - name: Login to Heroku Container Registry
+        run: |
+          echo "Logging in to Heroku Container Registry..."
+          heroku container:login || {
+            echo "Failed to login to Heroku Container Registry"
+            exit 1
+          }
+          echo "Login successful."
+        continue-on-error: false
 
       - name: Deploy to Heroku Staging
         if: |
           github.event.inputs.environment == 'staging' ||
           (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: |
-          heroku container:login
+          echo "Starting deployment to staging environment..."
           
           # Check if app exists
-          if ! heroku apps:info langchain-search-api-staging &> /dev/null; then
-            echo "Creating new app with container stack"
-            heroku apps:create langchain-search-api-staging --stack=container
+          if heroku apps:info langchain-search-api-staging 2>&1 | grep -q "No app matches"; then
+            echo "App does not exist, creating new app with container stack..."
+            heroku apps:create langchain-search-api-staging --stack=container || {
+              echo "Failed to create app"
+              exit 1
+            }
+            echo "App created successfully."
+          else
+            echo "App already exists, continuing with deployment."
           fi
           
           # Set the environment variable
-          heroku config:set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" --app langchain-search-api-staging
+          echo "Setting environment variables..."
+          heroku config:set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" --app langchain-search-api-staging || {
+            echo "Failed to set environment variables"
+            exit 1
+          }
+          echo "Environment variables set successfully."
           
           # Deploy the container
-          heroku container:push web --app langchain-search-api-staging
-          heroku container:release web --app langchain-search-api-staging
+          echo "Pushing container to Heroku..."
+          heroku container:push web --app langchain-search-api-staging || {
+            echo "Failed to push container"
+            exit 1
+          }
+          echo "Container pushed successfully."
+          
+          echo "Releasing container..."
+          heroku container:release web --app langchain-search-api-staging || {
+            echo "Failed to release container"
+            exit 1
+          }
+          echo "Container released successfully."
+          
+          echo "Deployment to staging environment completed successfully."
+        continue-on-error: false
 
       - name: Deploy to Heroku Production
         if: |
           github.event.inputs.environment == 'production' ||
           (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: |
-          heroku container:login
+          echo "Starting deployment to production environment..."
           
           # Check if app exists
-          if ! heroku apps:info langchain-search-api &> /dev/null; then
-            echo "Creating new app with container stack"
-            heroku apps:create langchain-search-api --stack=container
+          if heroku apps:info langchain-search-api 2>&1 | grep -q "No app matches"; then
+            echo "App does not exist, creating new app with container stack..."
+            heroku apps:create langchain-search-api --stack=container || {
+              echo "Failed to create app"
+              exit 1
+            }
+            echo "App created successfully."
+          else
+            echo "App already exists, continuing with deployment."
           fi
           
           # Set the environment variable
-          heroku config:set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" --app langchain-search-api
+          echo "Setting environment variables..."
+          heroku config:set OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" --app langchain-search-api || {
+            echo "Failed to set environment variables"
+            exit 1
+          }
+          echo "Environment variables set successfully."
           
           # Deploy the container
-          heroku container:push web --app langchain-search-api
-          heroku container:release web --app langchain-search-api 
+          echo "Pushing container to Heroku..."
+          heroku container:push web --app langchain-search-api || {
+            echo "Failed to push container"
+            exit 1
+          }
+          echo "Container pushed successfully."
+          
+          echo "Releasing container..."
+          heroku container:release web --app langchain-search-api || {
+            echo "Failed to release container"
+            exit 1
+          }
+          echo "Container released successfully."
+          
+          echo "Deployment to production environment completed successfully."
+        continue-on-error: false 
