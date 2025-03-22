@@ -11,8 +11,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
-# Environment variables will be passed from Heroku
-# No need to set them here
+# Define build arguments
+ARG OPENAI_API_KEY
+# Set environment variables from build args
+ENV OPENAI_API_KEY=$OPENAI_API_KEY
 
 # Run the FastAPI app
 CMD uvicorn src.main:app --host=0.0.0.0 --port=${PORT:-8000}
