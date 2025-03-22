@@ -27,7 +27,15 @@ jobs:
 
       - name: Install Heroku CLI
         run: |
+          # Install a specific version (v8) of Heroku CLI to avoid container stack issues
+          echo "Installing Heroku CLI v8..."
           curl https://cli-assets.heroku.com/install.sh | sh
+          
+          # Pin to version 8.x
+          npm install -g heroku@8.1.9
+          
+          # Verify version
+          heroku --version
         continue-on-error: false
 
       - name: Create Heroku Authentication file
