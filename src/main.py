@@ -6,6 +6,7 @@ from langchain_openai import ChatOpenAI
 from typing import Optional
 import os
 from dotenv import load_dotenv
+import sys
 
 # Load environment variables from parent directory
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
@@ -22,6 +23,7 @@ search = DuckDuckGoSearchRun()
 llm = ChatOpenAI(
     temperature=0,
     model="gpt-3.5-turbo",
+    api_key=os.getenv("OPENAI_API_KEY"),
 )
 
 # Initialize agent
@@ -64,6 +66,23 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
+
+@app.get("/debug-env")
+async def debug_env():
+    # Only return a masked version of the API key for security
+    api_key = os.getenv("OPENAI_API_KEY", "Not set")
+    if api_key != "Not set" and len(api_key) > 8:
+        masked_key = api_key[:4] + "..." + api_key[-4:]
+    else:
+        masked_key = "Not properly set"
+    
+    return {
+        "env_vars": {
+            "OPENAI_API_KEY": masked_key,
+            "PORT": os.getenv("PORT", "Not set"),
+            "python_version": sys.version,
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn
